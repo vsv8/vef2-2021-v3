@@ -5,6 +5,7 @@ dotenv.config();
 
 const {
   DATABASE_URL: connectionString,
+  NODE_ENV: nodeEnv = 'development',
 } = process.env;
 
 if (!connectionString) {
@@ -12,7 +13,10 @@ if (!connectionString) {
   process.exit(1);
 }
 
-const pool = new pg.Pool({ connectionString });
+// Notum SSL tengingu við gagnagrunn ef við erum *ekki* í development mode, þ.e.a.s. á local vél
+const ssl = nodeEnv !== 'development' ? { rejectUnauthorized: false } : false;
+
+const pool = new pg.Pool({ connectionString, ssl });
 
 pool.on('error', (err) => {
   console.error('Villa í tengingu við gagnagrunn, forrit hættir', err);

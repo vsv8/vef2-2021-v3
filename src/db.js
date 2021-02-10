@@ -31,11 +31,13 @@ export async function query(_query, values = []) {
 }
 
 /**
+ * Insert a single registration into the registration table.
  *
  * @param {string} entry.name – Name of registrant
  * @param {string} entry.nationalId – National ID of registrant
  * @param {string} entry.comment – Comment, if any from registrant
  * @param {boolean} entry.anonymous – If the registrants name should be displayed or not
+ * @returns {Promise<boolean>} Promise, resolved as true if inserted, otherwise false
  */
 export async function insert({
   name, nationalId, comment, anonymous,
@@ -61,7 +63,9 @@ export async function insert({
 }
 
 /**
+ * List all registrations from the registration table.
  *
+ * @returns {Promise<Array<list>>} Promise, resolved to array of all registrations.
  */
 export async function list() {
   let result = [];
@@ -78,4 +82,9 @@ export async function list() {
   }
 
   return result;
+}
+
+// Helper to remove pg from the event loop
+export async function end() {
+  await pool.end();
 }

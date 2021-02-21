@@ -1,5 +1,6 @@
 import pg from 'pg';
 import dotenv from 'dotenv';
+import faker from 'faker';
 
 dotenv.config();
 
@@ -87,6 +88,61 @@ export async function list() {
 
   return result;
 }
+
+function createNationalId() {
+  let str = '';
+  for (let i = 0; i < 10; i++ ) {
+    str += Math.floor(Math.random()*10);
+  }
+  return str;
+}
+
+export async function fakeData() {
+  const name = faker.name.findName();
+  const nationalId = createNationalId();
+  let comment = '';
+  let anonymous = false;
+
+  if (Math.random() < 0.5) {
+    comment = faker.lorem.sentence();
+  }
+  if (Math.random() < 0.5) {
+    anonymous = true;
+  }
+  const from = new Date(Date.now() - 604800000*2);
+  const to = new Date(Date.now());
+  
+  const signed = faker.date.between(from, to);
+
+  // console.log('name: ' + name);
+  // console.log('nationalId: ' + nationalId);
+  // console.log('comment: ' + comment);
+  // console.log('anonymous: ' + anonymous);
+  // console.log('signed: ' + signed);
+
+  let success = true;
+
+  const q = `
+    INSERT INTO signatures
+      (name, nationalId, comment, anonymous, signed)
+    VALUES
+      ($1, $2, $3, $4, $5);
+  `;
+  const values = [name, nationalId, comment, anonymous, signed];
+
+  try {
+    await query(q, values);
+  } catch (e) {
+    console.error('Error inserting signature', e);
+    success = false;
+  }
+
+  return success;
+}
+
+// for (let i = 0; i < 500; i++) {
+//   await fakeData();
+// }
 
 // Helper to remove pg from the event loop
 export async function end() {

@@ -1,5 +1,5 @@
 import { readFile } from 'fs/promises';
-import { query, end } from './db.js';
+import { query, end, fakeData } from './db.js';
 
 const schemaFile = './sql/schema.sql';
 
@@ -11,6 +11,10 @@ async function create() {
   await end();
 
   console.info('Schema created');
+}
+
+for (let i = 0; i < 10; i++) {
+  await fakeData();
 }
 
 create().catch((err) => {

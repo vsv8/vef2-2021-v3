@@ -89,10 +89,63 @@ export async function list() {
   return result;
 }
 
+export async function pageSelection(page) {
+  const size = 50;
+
+  const pages = {
+    count: 0,
+    prev: page !== 1,
+    curr: page,
+    next: true,
+    signatureCount: 0,
+    info: [],
+  };
+
+  if (pages.curr === 1) pages.prev = false;
+
+  try {
+    const q = 'SELECT COUNT(*) FROM signatures';
+    const queryResult = await query(q);
+
+    pages.signatureCount = queryResult.rows[0].count;
+    pages.count = Math.ceil(pages.signatureCount / size);
+  } catch (err) {
+    console.error(err);
+  }
+
+  if (pages.signatureCount === '0') return pages;
+
+  if (pages.count < page) {
+    page = pages.count; // eslint-disable-line
+    pages.curr = page;
+  }
+
+  pages.next = pages.count !== page;
+
+  try {
+    const q = 'SELECT * FROM signatures ORDER BY signed OFFSET $1 LIMIT $2';
+    const queryResult2 = await query(q, [(page - 1) * size, size]);
+    pages.info = queryResult2.rows;
+  } catch (err) {
+    console.error(err);
+  }
+
+  return pages;
+}
+
+export async function deleteSignatureById(id) {
+  try {
+    const q = 'DELETE FROM signatures WHERE id = $1';
+    await query(q, [id]);
+  } catch (err) {
+    console.error(err);
+  }
+}
+
 function createNationalId() {
   let str = '';
-  for (let i = 0; i < 10; i++ ) {
-    str += Math.floor(Math.random()*10);
+  for (let i = 0; i < 10; i += 1) {
+    str += Math.floor(Math.random() * 10);
   }
   return str;
 }
@@ -109,16 +162,9 @@ export async function fakeData() {
   if (Math.random() < 0.5) {
     anonymous = true;
   }
-  const from = new Date(Date.now() - 604800000*2);
+  const from = new Date(Date.now() - 604800000 * 2);
   const to = new Date(Date.now());
-  
   const signed = faker.date.between(from, to);
-
-  // console.log('name: ' + name);
-  // console.log('nationalId: ' + nationalId);
-  // console.log('comment: ' + comment);
-  // console.log('anonymous: ' + anonymous);
-  // console.log('signed: ' + signed);
 
   let success = true;
 
@@ -139,10 +185,6 @@ export async function fakeData() {
 
   return success;
 }
-
-// for (let i = 0; i < 500; i++) {
-//   await fakeData();
-// }
 
 // Helper to remove pg from the event loop
 export async function end() {

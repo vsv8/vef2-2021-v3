@@ -2,7 +2,7 @@ import express from 'express';
 import { body, validationResult } from 'express-validator';
 import xss from 'xss';
 
-import { list, insert } from './db.js';
+import { list, insert, pageSelection } from './db.js';
 
 export const router = express.Router();
 
@@ -17,6 +17,9 @@ function catchErrors(fn) {
 }
 
 async function index(req, res) {
+  let { page = 1 } = req.query;
+  page = Number(page);
+
   const errors = [];
   const formData = {
     name: '',
@@ -25,10 +28,10 @@ async function index(req, res) {
     comment: '',
   };
 
-  const registrations = await list();
+  const signaturePage = await pageSelection(page);
 
   res.render('index', {
-    errors, formData, registrations,
+    errors, formData, signaturePage,
   });
 }
 
@@ -73,12 +76,12 @@ async function validationCheck(req, res, next) {
   const formData = {
     name, nationalId, comment, anonymous,
   };
-  const registrations = await list();
+  const signaturePage = await list();
 
   const validation = validationResult(req);
 
   if (!validation.isEmpty()) {
-    return res.render('index', { formData, errors: validation.errors, registrations });
+    return res.render('index', { formData, errors: validation.errors, signaturePage });
   }
 
   return next();

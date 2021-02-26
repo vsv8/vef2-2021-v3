@@ -1,0 +1,41 @@
+<% if (admin) { %>
+  <div class="paging">
+    <% if (signaturePage.signatureCount <= 50) { %>
+      <p>Fyrri síða</p>
+      <p>Síða 1 af 1</p>
+      <p>Seinni síða</p>
+    <% } else if (!signaturePage.prev) { %>
+      <p>Fyrri síða</p>
+      <p>Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
+      <a href="<%= signaturePage.next ? `/admin?page=${signaturePage.curr + 1}` : `admin?page=${signaturePage.count}`%>">Næsta síða</a>
+    <% } else if (!signaturePage.next) { %>
+      <a href="<%= signaturePage.prev ? `/admin?page=${signaturePage.curr - 1}` : '/' %>">Fyrri síða</a>
+      <p>Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
+      <p>Seinni síða</p>
+    <% } else { %>
+      <a href="<%= signaturePage.prev ? `/admin?page=${signaturePage.curr - 1}` : '/' %>">Fyrri síða</a>
+      <p>Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
+      <a href="<%= signaturePage.next ? `/admin?page=${signaturePage.curr + 1}` : `admin?page=${signaturePage.count}`%>">Næsta síða</a>
+    <% } %>
+  </div>
+<% } else { %> 
+  <div class="paging">
+    <% if (signaturePage.signatureCount <= 50) { %>
+      <p>Fyrri síða</p>
+      <p>Síða 1 af 1</p>
+      <p>Seinni síða</p>
+    <% } else if (!signaturePage.prev) { %>
+      <p>Fyrri síða</p>
+      <p>Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
+      <a href="<%= signaturePage.next ? `/?page=${signaturePage.curr + 1}` : `page=${signaturePage.count}`%>">Næsta síða</a>
+    <% } else if (!signaturePage.next) { %>
+      <a href="<%= signaturePage.prev ? `/?page=${signaturePage.curr - 1}` : '/' %>">Fyrri síða</a>
+      <p>Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
+      <p>Seinni síða</p>
+    <% } else { %>
+      <a class="prev" href="<%= signaturePage.prev ? `/?page=${signaturePage.curr - 1}` : '/' %>">Fyrri síða</a>
+      <p class="curr">Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
+      <a class="next" href="<%= signaturePage.next ? `/?page=${signaturePage.curr + 1}` : `page=${signaturePage.count}`%>">Næsta síða</a>
+    <% } %>
+  </div>
+<% } %>

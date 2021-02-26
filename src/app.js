@@ -2,20 +2,29 @@ import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 import express from 'express';
+import session from 'express-session';
 import dotenv from 'dotenv';
 import { format } from 'date-fns';
 
+import passport from './login.js';
 import { router as registrationRouter } from './registration.js';
+import { router as adminRoute } from './admin.js';
 
 dotenv.config();
 
 const {
   PORT: port = 3000,
+  SESSION_SECRET: sessionSecret,
+  DATABASE_URL: connectionString,
 } = process.env;
+
+if (!connectionString || !sessionSecret) {
+  console.error('Vantar gögn í env');
+  process.exit(1);
+}
 
 const app = express();
 
-// Sér um að req.body innihaldi gögn úr formi
 app.use(express.urlencoded({ extended: true }));
 
 const path = dirname(fileURLToPath(import.meta.url));
@@ -24,6 +33,65 @@ app.use(express.static(join(path, '../public')));
 
 app.set('views', join(path, '../views'));
 app.set('view engine', 'ejs');
+
+// Passport mun verða notað með session
+app.use(session({
+  secret: sessionSecret,
+  resave: false,
+  saveUninitialized: false,
+  maxAge: 20 * 1000, // 20 sek
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// Sér um að req.body innihaldi gögn úr formi
+
+app.use(async (req, res, next) => {
+  if (req.isAuthenticated()) {
+    // getum núna notað user í viewum
+    res.locals.user = await req.user;
+  }
+  next();
+});
+
+app.get('/login', (req, res) => {
+  if (req.isAuthenticated()) {
+    return res.redirect('/');
+  }
+
+  let message = '';
+
+  // Athugum hvort einhver skilaboð séu til í session, ef svo er birtum þau
+  // og hreinsum skilaboð
+  if (req.session.messages && req.session.messages.length > 0) {
+    message = req.session.messages.join(', ');
+
+    req.session.messages = [];
+  }
+  // HERNA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  return res.render('login', { message });
+});
+
+app.post(
+  '/login',
+
+  // Þetta notar strat að ofan til að skrá notanda inn
+  passport.authenticate('local', {
+    failureMessage: 'Notandanafn eða lykilorð vitlaust.',
+    failureRedirect: '/login',
+  }),
+
+  // Ef við komumst hingað var notandi skráður inn, senda á /admin
+  (req, res) => {
+    res.redirect('/admin');
+  },
+);
+
+app.get('/logout', (req, res) => {
+  req.logout();
+  res.redirect('/');
+});
 
 /**
  * Hjálparfall til að athuga hvort reitur sé gildur eða ekki.
@@ -53,6 +121,8 @@ app.locals.formatDate = (str) => {
 };
 
 app.use('/', registrationRouter);
+
+app.use('/', adminRoute);
 
 /**
  * Middleware sem sér um 404 villur.

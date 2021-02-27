@@ -69,7 +69,7 @@ app.get('/login', (req, res) => {
 
     req.session.messages = [];
   }
-  // HERNA >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
   return res.render('login', { message });
 });
 

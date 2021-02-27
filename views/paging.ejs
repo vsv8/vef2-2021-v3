@@ -33,9 +33,9 @@
       <p>Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
       <p>Seinni síða</p>
     <% } else { %>
-      <a class="prev" href="<%= signaturePage.prev ? `/?page=${signaturePage.curr - 1}` : '/' %>">Fyrri síða</a>
-      <p class="curr">Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
-      <a class="next" href="<%= signaturePage.next ? `/?page=${signaturePage.curr + 1}` : `page=${signaturePage.count}`%>">Næsta síða</a>
+      <a href="<%= signaturePage.prev ? `/?page=${signaturePage.curr - 1}` : '/' %>">Fyrri síða</a>
+      <p>Síða <%= signaturePage.curr %> af <%= signaturePage.count %></p>
+      <a href="<%= signaturePage.next ? `/?page=${signaturePage.curr + 1}` : `page=${signaturePage.count}`%>">Næsta síða</a>
     <% } %>
   </div>
 <% } %>

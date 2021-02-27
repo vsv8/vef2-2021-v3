@@ -10,9 +10,7 @@
     "dev": "nodemon ./src/app.js",
     "start": "node ./src/app.js",
     "setup": "node ./src/setup.js",
-    "test:eslint": "eslint ./src",
-    "test:stylelint": "stylelint ./public/styles.css --syntax css",
-    "test": "concurrently npm:test:*"
+    "test": "eslint ./src"
   },
   "keywords": [],
   "author": "",
